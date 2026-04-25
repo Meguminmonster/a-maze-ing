@@ -1,5 +1,5 @@
-from mazegen.cell import Cell
-from mazegen.generator import MazeGenerator
-from mazegen.maze import Maze
+from .cell import Cell
+from .maze import Maze
+from .generator import MazeGenerator
 
-__all__ = ["MazeGenerator", "Maze", "Cell"]
+__all__ = ["Cell", "Maze", "MazeGenerator"]

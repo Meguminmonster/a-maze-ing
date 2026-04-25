@@ -1,20 +1,15 @@
 import random
 from typing import Tuple, Optional
-from mazegen.maze import Maze
-from mazegen.errors import MazeGenerationError
+from collections import deque
+
+from app.errors import MazeGenerationError
+from .maze import Maze
 
 
 NORTH = 1
 EAST = 2
 SOUTH = 4
 WEST = 8
-
-OPPOSITE = {
-    NORTH: SOUTH,
-    EAST: WEST,
-    SOUTH: NORTH,
-    WEST: EAST,
-}
 
 DIRS = [
     (0, -1, NORTH, SOUTH),
@@ -46,23 +41,32 @@ class MazeGenerator:
             random.seed(seed)
 
         self.maze = Maze(width, height)
+        self.solution: list[tuple[int, int]] = []
 
     def generate(self) -> Maze:
-
         self._reserve_42_pattern()
 
         sx, sy = self.entry_pos
+        ex, ey = self.exit_pos
+
+        if self.maze.get_cell(sx, sy).is_42_block:
+            raise MazeGenerationError("Entry is inside the 42 pattern.")
+        if self.maze.get_cell(ex, ey).is_42_block:
+            raise MazeGenerationError("Exit is inside the 42 pattern.")
+
+        self.maze.get_cell(sx, sy).walls = 15
+
         self._carve_passages(sx, sy)
 
         if not self.perfect:
             self._add_cycles()
 
         self._open_entry_exit()
+        self.solution = self._solve_bfs()
 
         return self.maze
 
     def _reserve_42_pattern(self) -> None:
-
         pattern = [
             [1, 0, 1, 0, 1, 1, 1],
             [1, 0, 1, 0, 0, 0, 1],
@@ -85,14 +89,14 @@ class MazeGenerator:
                 if pattern[y][x] == 1:
                     cell = self.maze.get_cell(ox + x, oy + y)
                     cell.is_42_block = True
-                    cell.visited = True
                     cell.walls = 15
 
     def _carve_passages(self, cx: int, cy: int) -> None:
-
         cell = self.maze.get_cell(cx, cy)
-        cell.visited = True
+        if cell is None or cell.is_42_block:
+            return
 
+        cell.visited = True
         dirs = DIRS[:]
         random.shuffle(dirs)
 
@@ -100,21 +104,19 @@ class MazeGenerator:
             nx, ny = cx + dx, cy + dy
             neighbor = self.maze.get_cell(nx, ny)
 
-            if (
-                neighbor
-                and not neighbor.visited
-                and not neighbor.is_42_block
-            ):
+            if neighbor and not neighbor.visited and not neighbor.is_42_block:
                 cell.break_wall(w)
                 neighbor.break_wall(ow)
                 self._carve_passages(nx, ny)
 
     def _add_cycles(self, attempts: int = 20) -> None:
-
         for _ in range(attempts):
             x = random.randrange(self.width)
             y = random.randrange(self.height)
             cell = self.maze.get_cell(x, y)
+
+            if cell.is_42_block:
+                continue
 
             dx, dy, w, ow = random.choice(DIRS)
             nx, ny = x + dx, y + dy
@@ -125,7 +127,6 @@ class MazeGenerator:
                 neighbor.break_wall(ow)
 
     def _open_entry_exit(self) -> None:
-
         for (x, y) in [self.entry_pos, self.exit_pos]:
             cell = self.maze.get_cell(x, y)
 
@@ -137,3 +138,44 @@ class MazeGenerator:
                 cell.break_wall(WEST)
             elif x == self.width - 1:
                 cell.break_wall(EAST)
+
+    def _solve_bfs(self) -> list[tuple[int, int]]:
+        start = self.entry_pos
+        goal = self.exit_pos
+
+        queue = deque([start])
+        visited = {start: None}
+
+        while queue:
+            x, y = queue.popleft()
+
+            if (x, y) == goal:
+                break
+
+            for dx, dy, w, _ in DIRS:
+                nx, ny = x + dx, y + dy
+                cell = self.maze.get_cell(x, y)
+                neigh = self.maze.get_cell(nx, ny)
+
+                if neigh is None:
+                    continue
+
+                if cell.has_wall(w):
+                    continue
+
+                if (nx, ny) not in visited:
+                    visited[(nx, ny)] = (x, y)
+                    queue.append((nx, ny))
+
+        if goal not in visited:
+            return []
+
+        path = []
+        cur = goal
+        while cur != start:
+            path.append(cur)
+            cur = visited[cur]
+        path.append(start)
+        path.reverse()
+
+        return path
