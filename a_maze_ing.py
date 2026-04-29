@@ -7,7 +7,7 @@ from app.printer import (
     rotate_colour,
     write_output_file,
 )
-from magezen.generator import MazeGenerator
+from mazegen.generator import MazeGenerator
 
 
 def _coords_to_directions(coords):
