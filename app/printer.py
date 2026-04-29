@@ -33,6 +33,18 @@ def render_maze(
     path: Optional[list[tuple[int, int]]] = None,
     wall_colour: str = "white",
 ) -> str:
+    """Render the maze as an ASCII string for terminal display.
+
+    Args:
+        grid: 2D list of integers where each value is a bitmask of walls (N=1, E=2, S=4, W=8).
+        entry: Entrance coordinates as (x, y).
+        exit_: Exit coordinates as (x, y).
+        path: Optional list of (x, y) coordinates representing the solution path.
+        wall_colour: Colour of the walls, as a colour name string.
+    Returns:
+        ASCII string representation of the maze, or empty string if grid is empty.
+    """
+
     if not grid or not grid[0]:
         return ""
 
@@ -96,6 +108,7 @@ def render_maze(
 
 
 def print_menu() -> None:
+    """Print the interactive menu options to the terminal."""
     print("\n=== A-Maze-ing ===")
     print("1. Re-generate a new maze")
     print("2. Show/Hide path from entry to exit")
@@ -105,18 +118,35 @@ def print_menu() -> None:
 
 
 def rotate_colour(current: str) -> str:
+    """Return the next wall colour in the rotation cycle.
+
+    Args:
+        current: The current colour name as a string.
+    Returns:
+        The next colour name in the list.
+    """
     colour_list = list(COLOURS.keys())
     idx = colour_list.index(current) if current in colour_list else 0
     return colour_list[(idx + 1) % len(colour_list)]
 
 
 def write_output_file(
+    
     grid: list[list[int]],
     entry: tuple[int, int],
     exit_: tuple[int, int],
     path: list[str],
     filepath: str,
 ) -> None:
+    """Write the maze data to an output file.
+
+    Args:
+        grid: 2D list of integers where each value is a bitmask of walls (N=1, E=2, S=4, W=8).
+        entry: Entrance coordinates as (x, y).
+        exit_: Exit coordinates as (x, y).
+        path: List of direction strings representing the solution path (N, E, S, W).
+        filepath: Path to the output text file.
+    """
     with open(filepath, "w") as f:
         for row in grid:
             f.write("".join(f"{cell & 0xF:X}" for cell in row) + "\n")

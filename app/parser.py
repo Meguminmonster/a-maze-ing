@@ -7,6 +7,17 @@ REQUIRED_KEYS = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"}
 
 @dataclass
 class MazeConfig:
+    """Represents the configuration of the maze.
+
+    Attributes:
+        width: Number of columns.
+        height: Number of rows.
+        entry: Entrance coordinates as (x, y).
+        exit: Exit coordinates as (x, y).
+        output_file: Path to the output text file.
+        perfect: If True, maze has exactly one path between any two points.
+        seed: Optional number that fixes the random generation for reproducibility.
+    """
     width: int
     height: int
     entry: tuple[int, int]
@@ -17,6 +28,15 @@ class MazeConfig:
 
 
 def parse_config(filepath: str) -> MazeConfig:
+    """Read a configuration file and return a MazeConfig object.
+
+    Args:
+        filepath: Path to the configuration text file.
+    Returns:
+        A MazeConfig instance with the parsed maze settings.
+    Raises:
+        ConfigError: If the file is missing, malformed, or contains invalid values.
+    """
     raw: dict[str, str] = {}
 
     try:

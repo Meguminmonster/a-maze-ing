@@ -1,13 +1,13 @@
 class MazeError(Exception):
-    """Base errors"""
+    """Base exception for all maze-related erros."""
     pass
 
 
 class ConfigError(MazeError):
-    """File is invalid or missing."""
+    """Raised when the configuration file is invalid or missing."""
     pass
 
 
 class MazeGenerationError(MazeError):
-    """Impossible parameters or similar"""
+    """Raised when maze generation fails due to impossible parameters."""
     pass
