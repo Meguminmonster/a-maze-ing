@@ -150,23 +150,32 @@ class MazeGenerator:
                 self._carve_passages(nx, ny)
 
     def _add_cycles(self, attempts: int = 20) -> None:
-        for _ in range(attempts):
-            x = random.randrange(self.width)
-            y = random.randrange(self.height)
-            cell = self.maze.get_cell(x, y)
+            """Add extra passages to create multiple paths between points.
 
-            if cell.is_42_block:
-                continue
+            Only used when the maze is not perfect.
 
-            dx, dy, w, ow = random.choice(DIRS)
-            nx, ny = x + dx, y + dy
-            neighbor = self.maze.get_cell(nx, ny)
+            Args:
+                attempts: Number of random wall removals to attempt.
+            """
 
-            if neighbor and not neighbor.is_42_block:
-                cell.break_wall(w)
-                neighbor.break_wall(ow)
+    for _ in range(attempts):
+        x = random.randrange(self.width)
+        y = random.randrange(self.height)
+        cell = self.maze.get_cell(x, y)
+
+        if cell.is_42_block:
+            continue
+
+        dx, dy, w, ow = random.choice(DIRS)
+        nx, ny = x + dx, y + dy
+        neighbor = self.maze.get_cell(nx, ny)
+
+        if neighbor and not neighbor.is_42_block:
+            cell.break_wall(w)
+            neighbor.break_wall(ow)
 
     def _open_entry_exit(self) -> None:
+        """Open the outer wall at the entry and exit positions to allow access to the maze."""
         for (x, y) in [self.entry_pos, self.exit_pos]:
             cell = self.maze.get_cell(x, y)
 
@@ -180,6 +189,12 @@ class MazeGenerator:
                 cell.break_wall(EAST)
 
     def _solve_bfs(self) -> list[tuple[int, int]]:
+        """Find the shortest path from entry to exit using BFS.
+
+        Returns:
+            List of (x, y) coordinates representing the shortest path,
+            or an empty list if no path exists.
+        """
         start = self.entry_pos
         goal = self.exit_pos
 
