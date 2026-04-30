@@ -10,7 +10,14 @@ from app.printer import (
 from mazegen.generator import MazeGenerator
 
 
-def _coords_to_directions(coords):
+def _coords_to_directions(coords: list[tuple[int, int]]) -> list[str]:
+    """Convert a list of coordinates into a list of direction strings.
+
+    Args:
+        coords: List of (x, y) coordinates representing the solution path.
+    Returns:
+        List of direction strings (N, S, E, W).
+    """
     if not coords or len(coords) < 2:
         return []
 
@@ -28,6 +35,13 @@ def _coords_to_directions(coords):
 
 
 def run(config: MazeConfig) -> None:
+    """Generate the maze, save it to a file, and handle the interactive menu.
+
+    Args:
+        config: MazeConfig instance with the maze parameters.
+    Raises:
+        OSError: If the output file cannot be written.
+    """
     wall_colour = "white"
     show_path = False
 
@@ -113,6 +127,13 @@ def run(config: MazeConfig) -> None:
 
 
 def main() -> None:
+    """Parse command-line arguments, load the configuration and run the maze.
+
+    Raises:
+        ConfigError: If the configuration file is missing or invalid.
+        MazeError: If the maze cannot be generated with the given parameters.
+        KeyboardInterrupt: If the user cancels the operation.
+    """
     if len(sys.argv) != 2:
         print("Usage: python3 a_maze_ing.py <config_file>", file=sys.stderr)
         sys.exit(1)
