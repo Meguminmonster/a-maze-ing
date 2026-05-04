@@ -64,6 +64,7 @@ class MazeGenerator:
 
         self.maze = Maze(width, height)
         self.solution: list[tuple[int, int]] = []
+        self.pattern_42: set[tuple[int, int]] = set()
 
     def generate(self) -> Maze:
         """Generate the maze reserving space for the 42 pattern.
@@ -124,6 +125,7 @@ class MazeGenerator:
                     cell = self.maze.get_cell(ox + x, oy + y)
                     cell.is_42_block = True
                     cell.walls = 15
+                    self.pattern_42.add((ox + x, oy + y))
 
     def _carve_passages(self, cx: int, cy: int) -> None:
         """Carve passages through the maze using recursive DFS.
@@ -150,29 +152,29 @@ class MazeGenerator:
                 self._carve_passages(nx, ny)
 
     def _add_cycles(self, attempts: int = 20) -> None:
-            """Add extra passages to create multiple paths between points.
+        """Add extra passages to create multiple paths between points.
 
-            Only used when the maze is not perfect.
+        Only used when the maze is not perfect.
 
-            Args:
-                attempts: Number of random wall removals to attempt.
+        Args:
+            attempts: Number of random wall removals to attempt.
             """
 
-    for _ in range(attempts):
-        x = random.randrange(self.width)
-        y = random.randrange(self.height)
-        cell = self.maze.get_cell(x, y)
+        for _ in range(attempts):
+            x = random.randrange(self.width)
+            y = random.randrange(self.height)
+            cell = self.maze.get_cell(x, y)
 
-        if cell.is_42_block:
-            continue
+            if cell.is_42_block:
+                continue
 
-        dx, dy, w, ow = random.choice(DIRS)
-        nx, ny = x + dx, y + dy
-        neighbor = self.maze.get_cell(nx, ny)
+            dx, dy, w, ow = random.choice(DIRS)
+            nx, ny = x + dx, y + dy
+            neighbor = self.maze.get_cell(nx, ny)
 
-        if neighbor and not neighbor.is_42_block:
-            cell.break_wall(w)
-            neighbor.break_wall(ow)
+            if neighbor and not neighbor.is_42_block:
+                cell.break_wall(w)
+                neighbor.break_wall(ow)
 
     def _open_entry_exit(self) -> None:
         """Open the outer wall at the entry and exit positions to allow access to the maze."""

@@ -8,6 +8,7 @@ COLOURS = {
     "green":  "\033[92m",
     "red":    "\033[91m",
     "blue":   "\033[94m",
+    "purple": "\033[95m",
 }
 
 NORTH = 1
@@ -32,6 +33,7 @@ def render_maze(
     exit_: tuple[int, int],
     path: Optional[list[tuple[int, int]]] = None,
     wall_colour: str = "white",
+    pattern_42: Optional[set[tuple[int, int]]] = None
 ) -> str:
     """Render the maze as an ASCII string for terminal display.
 
@@ -41,6 +43,7 @@ def render_maze(
         exit_: Exit coordinates as (x, y).
         path: Optional list of (x, y) coordinates representing the solution path.
         wall_colour: Colour of the walls, as a colour name string.
+        pattern_42: set of positions of 42 
     Returns:
         ASCII string representation of the maze, or empty string if grid is empty.
     """
@@ -52,6 +55,7 @@ def render_maze(
     width = len(grid[0])
 
     path_set: set[tuple[int, int]] = set(path) if path else set()
+    pattern_42_set: set[tuple[int, int]] = pattern_42 if pattern_42 else set()
     colour = COLOURS.get(wall_colour, COLOURS["white"])
 
     lines: list[str] = []
@@ -80,7 +84,9 @@ def render_maze(
             elif cell_pos == exit_:
                 mid_line += COLOURS["red"] + " X " + RESET
             elif cell_pos in path_set:
-                mid_line += COLOURS["cyan"] + " · " + RESET
+                mid_line += "\033[46m   \033[0m" + RESET
+            elif cell_pos in pattern_42_set:
+                mid_line += COLOURS["purple"] + "███" + RESET
             else:
                 mid_line += "   "
 

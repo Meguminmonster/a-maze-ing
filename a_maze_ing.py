@@ -57,6 +57,7 @@ def run(config: MazeConfig) -> None:
     maze = gen.generate()
     grid = [[cell.walls for cell in row] for row in maze.grid]
     solution = gen.solution
+    pattern_42 = gen.pattern_42
 
     try:
         write_output_file(
@@ -81,6 +82,7 @@ def run(config: MazeConfig) -> None:
                 exit_=config.exit,
                 path=path_coords,
                 wall_colour=wall_colour,
+                pattern_42=gen.pattern_42,
             )
         )
 
