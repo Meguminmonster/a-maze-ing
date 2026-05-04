@@ -1,12 +1,11 @@
-from dataclasses import dataclass
+from pydantic import BaseModel, field_validator, model_validator
 from typing import Optional
 from app.errors import ConfigError
 
 REQUIRED_KEYS = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"}
 
 
-@dataclass
-class MazeConfig:
+class MazeConfig(BaseModel):
     """Represents the configuration of the maze.
 
     Attributes:
@@ -21,11 +20,31 @@ class MazeConfig:
     width: int
     height: int
     entry: tuple[int, int]
-    exit: tuple[int, int]
+    exit_: tuple[int, int]
     output_file: str
     perfect: bool
     seed: Optional[int] = None
 
+    @field_validator("width")
+    @classmethod
+    def width_must_be_at_least_2(cls, v: int) -> int:
+        if v < 2:
+            raise ValueError("WIDTH must be at least 2")
+        return v
+    @field_validator("height")
+    @classmethod
+    def height_must_be_at_least_2(cls, v: int) -> int:
+        if v < 2:
+            raise ValueError("HEIGHT must be at least 2")
+        return v
+    @model_validator(mode="after")
+    def validate_coordinates(self) -> "MazeConfig":
+        if not (0 <= self.entry[0] < self.width and 
+                0 <= self.entry[1] < self.height):
+            raise ValueError(f"ENTRY {self.entry} outside the maze")
+        return self
+
+    
 
 def parse_config(filepath: str) -> MazeConfig:
     """Read a configuration file and return a MazeConfig object.
