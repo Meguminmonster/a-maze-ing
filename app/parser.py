@@ -4,6 +4,7 @@ from typing import Optional
 from app.errors import ConfigError
 
 REQUIRED_KEYS = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"}
+VALID_KEYS = REQUIRED_KEYS | {"SEED"}
 
 
 class MazeConfig(BaseModel):
@@ -46,17 +47,23 @@ class MazeConfig(BaseModel):
                 0 <= self.entry[1] < self.height):
             raise ValueError(f"ENTRY {self.entry} outside the maze")
         return self
-    
+
     @model_validator(mode="after")
     def not_exit(self) -> "MazeConfig":
         if self.entry == self.exit_:
             raise ValueError("ENTRY and EXIT coordinates must be different")
-        if not (0 <= self.entry[0] < self.width and 0 <= self.entry[1] < self.height):
-            raise ValueError (f"ENTRY {self.entry} outside the maze ({self.width}x{self.height})")
-        if not (0 <= self.exit_[0] < self.width and 0 <= self.exit_[1] < self.height):
-            raise ValueError(f"EXIT {self.exit_} outside the maze ({self.width}x{self.height})")
-        return self
 
+        w, h = self.width, self.height
+        ex, ey = self.entry
+        ox, oy = self.exit_
+
+        if not (0 <= ex < w and 0 <= ey < h):
+            raise ValueError(f"ENTRY {self.entry} outside the maze ({w}x{h})")
+
+        if not (0 <= ox < w and 0 <= oy < h):
+            raise ValueError(f"EXIT {self.exit_} outside the maze ({w}x{h})")
+
+        return self
 
 
 def parse_config(filepath: str) -> MazeConfig:
@@ -72,7 +79,7 @@ def parse_config(filepath: str) -> MazeConfig:
     raw: dict[str, str] = {}
 
     try:
-        with open(filepath, "r") as f:
+        with open(filepath, "r", errors="replace") as f:
             for line_number, line in enumerate(f, start=1):
                 line = line.strip()
                 if not line or line.startswith("#"):
@@ -82,17 +89,31 @@ def parse_config(filepath: str) -> MazeConfig:
                         f"Line {line_number}: expected 'KEY=VALUE'"
                     )
                 key, _, value = line.partition("=")
-                raw[key.strip()] = value.strip()
+                key = key.strip()
+                value = value.strip()
+
+                if key in raw:
+                    raise ConfigError(f"Duplicate key: '{key}'")
+
+                raw[key] = value
     except FileNotFoundError:
         raise ConfigError(f"Configuration file not found: '{filepath}'")
+    except UnicodeDecodeError:
+        raise ConfigError("Config file contains binary data")
     except OSError as e:
         raise ConfigError(f"Could not read configuration file: {e}")
+
+    unknown = raw.keys() - VALID_KEYS
+    if unknown:
+        raise ConfigError(f"Unknown keys: {', '.join(sorted(unknown))}")
 
     missing = REQUIRED_KEYS - raw.keys()
     if missing:
         raise ConfigError(f"Missing keys: {', '.join(sorted(missing))}")
 
     try:
+        width = int(raw["WIDTH"])
+        height = int(raw["HEIGHT"])
 
         entry_parts = raw["ENTRY"].split(",")
         exit_parts = raw["EXIT"].split(",")
@@ -110,15 +131,22 @@ def parse_config(filepath: str) -> MazeConfig:
         raise ConfigError("PERFECT must be 'True' or 'False'")
     perfect = perfect_raw == "true"
 
+    seed = None
+    if "SEED" in raw:
+        try:
+            seed = int(raw["SEED"])
+        except ValueError:
+            raise ConfigError("SEED must be an integer")
+
     try:
         return MazeConfig(
-            width=raw["WIDTH"],
-            height=raw["HEIGHT"],
+            width=width,
+            height=height,
             entry=entry,
             exit_=exit_,
             output_file=raw["OUTPUT_FILE"],
             perfect=perfect,
-            seed=raw.get("SEED"),
+            seed=seed,
         )
     except ValidationError as e:
         raise ConfigError(str(e))
