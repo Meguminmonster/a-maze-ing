@@ -1,4 +1,5 @@
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, field_validator
+from pydantic import model_validator, ValidationError
 from typing import Optional
 from app.errors import ConfigError
 
@@ -109,12 +110,15 @@ def parse_config(filepath: str) -> MazeConfig:
         raise ConfigError("PERFECT must be 'True' or 'False'")
     perfect = perfect_raw == "true"
 
-    return MazeConfig(
-        width=raw["WIDTH"],
-        height=raw["HEIGHT"],
-        entry=entry,
-        exit_=exit_,
-        output_file=raw["OUTPUT_FILE"],
-        perfect=perfect,
-        seed=raw.get("SEED"),
-    )
+    try:
+        return MazeConfig(
+            width=raw["WIDTH"],
+            height=raw["HEIGHT"],
+            entry=entry,
+            exit_=exit_,
+            output_file=raw["OUTPUT_FILE"],
+            perfect=perfect,
+            seed=raw.get("SEED"),
+        )
+    except ValidationError as e:
+        raise ConfigError(str(e))
