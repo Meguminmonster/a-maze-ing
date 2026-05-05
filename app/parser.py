@@ -45,6 +45,17 @@ class MazeConfig(BaseModel):
                 0 <= self.entry[1] < self.height):
             raise ValueError(f"ENTRY {self.entry} outside the maze")
         return self
+    
+    @model_validator(mode="after")
+    def not_exit(self) -> "MazeConfig":
+        if self.entry == self.exit_:
+            raise ValueError("ENTRY and EXIT coordinates must be different")
+        if not (0 <= self.entry[0] < self.width and 0 <= self.entry[1] < self.height):
+            raise ValueError (f"ENTRY {self.entry} outside the maze ({self.width}x{self.height})")
+        if not (0 <= self.exit_[0] < self.width and 0 <= self.exit_[1] < self.height):
+            raise ValueError(f"EXIT {self.exit_} outside the maze ({self.width}x{self.height})")
+        return self
+
 
 
 def parse_config(filepath: str) -> MazeConfig:
@@ -81,8 +92,6 @@ def parse_config(filepath: str) -> MazeConfig:
         raise ConfigError(f"Missing keys: {', '.join(sorted(missing))}")
 
     try:
-        width = int(raw["WIDTH"])
-        height = int(raw["HEIGHT"])
 
         entry_parts = raw["ENTRY"].split(",")
         exit_parts = raw["EXIT"].split(",")
@@ -100,28 +109,12 @@ def parse_config(filepath: str) -> MazeConfig:
         raise ConfigError("PERFECT must be 'True' or 'False'")
     perfect = perfect_raw == "true"
 
-    seed: Optional[int] = None
-    if "SEED" in raw:
-        try:
-            seed = int(raw["SEED"])
-        except ValueError:
-            raise ConfigError(f"SEED must be an integer, got: '{raw['SEED']}'")
-
-    if width < 2 or height < 2:
-        raise ConfigError("WIDTH and HEIGHT must be at least 2")
-    if entry == exit_:
-        raise ConfigError("ENTRY and EXIT coordinates must be different")
-    if not (0 <= entry[0] < width and 0 <= entry[1] < height):
-        raise ConfigError(f"ENTRY {entry} outside the maze ({width}x{height})")
-    if not (0 <= exit_[0] < width and 0 <= exit_[1] < height):
-        raise ConfigError(f"EXIT {exit_} outside the maze ({width}x{height})")
-
     return MazeConfig(
-        width=width,
-        height=height,
+        width=raw["WIDTH"],
+        height=raw["HEIGHT"],
         entry=entry,
-        exit=exit_,
+        exit_=exit_,
         output_file=raw["OUTPUT_FILE"],
         perfect=perfect,
-        seed=seed,
+        seed=raw.get("SEED"),
     )
