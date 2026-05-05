@@ -31,14 +31,14 @@ class MazeConfig(BaseModel):
     @classmethod
     def width_must_be_at_least_2(cls, v: int) -> int:
         if v < 2:
-            raise ValueError("WIDTH must be at least 2")
+            raise ValueError("WIDTH and HEIGHT must be at least 2")
         return v
 
     @field_validator("height")
     @classmethod
     def height_must_be_at_least_2(cls, v: int) -> int:
         if v < 2:
-            raise ValueError("HEIGHT must be at least 2")
+            raise ValueError("WIDTH and HEIGHT must be at least 2")
         return v
 
     @model_validator(mode="after")
@@ -65,6 +65,10 @@ class MazeConfig(BaseModel):
 
         return self
 
+    @property
+    def exit(self):
+        return self.exit_
+
 
 def parse_config(filepath: str) -> MazeConfig:
     """Read a configuration file and return a MazeConfig object.
@@ -79,7 +83,7 @@ def parse_config(filepath: str) -> MazeConfig:
     raw: dict[str, str] = {}
 
     try:
-        with open(filepath, "r", errors="replace") as f:
+        with open(filepath, "r") as f:
             for line_number, line in enumerate(f, start=1):
                 line = line.strip()
                 if not line or line.startswith("#"):
