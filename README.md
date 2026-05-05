@@ -26,21 +26,10 @@ Ejecución:
 make run
 ```
 
-Debug:
-```bash
-make debug
-```
-
 Linting:
 ```bash
-make lint
-make lint-strict
-```
-
-Limpieza:
-```bash
-make clean
-```
+flake8
+mypy
 
 ---
 
@@ -73,7 +62,6 @@ SEED=42
 
 ### Claves opcionales
 - `SEED`: Semilla para reproducibilidad.
-- Cualquier otra clave personalizada.
 
 ---
 
@@ -138,6 +126,24 @@ mazegen/
     cell.py
     generator.py
 ```
+
+### Construir el paquete
+
+# 1. Crear un entorno virtual
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 2. Instalar la herramienta de construcción
+pip install build
+
+# 3. Construir el paquete
+python3 -m build
+
+# 4. Instalar el paquete generado
+pip install dist/mazegen-1.0.0-py3-none-any.whl
+
+# 5. Verificar que el paquete esta instalado correctamente
+python3 -c "from mazegen import MazeGenerator; print('OK')"
 
 ### Uso básico
 

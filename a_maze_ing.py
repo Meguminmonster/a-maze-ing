@@ -49,7 +49,7 @@ def run(config: MazeConfig) -> None:
         width=config.width,
         height=config.height,
         entry_pos=config.entry,
-        exit_pos=config.exit,
+        exit_pos=config.exit_,
         perfect=config.perfect,
         seed=config.seed,
     )
@@ -63,7 +63,7 @@ def run(config: MazeConfig) -> None:
         write_output_file(
             grid=grid,
             entry=config.entry,
-            exit_=config.exit,
+            exit_=config.exit_,
             path=_coords_to_directions(solution),
             filepath=config.output_file,
         )
@@ -79,7 +79,7 @@ def run(config: MazeConfig) -> None:
             render_maze(
                 grid=grid,
                 entry=config.entry,
-                exit_=config.exit,
+                exit_=config.exit_,
                 path=path_coords,
                 wall_colour=wall_colour,
                 pattern_42=gen.pattern_42,
@@ -94,7 +94,7 @@ def run(config: MazeConfig) -> None:
                 width=config.width,
                 height=config.height,
                 entry_pos=config.entry,
-                exit_pos=config.exit,
+                exit_pos=config.exit_,
                 perfect=config.perfect,
                 seed=None,
             )
@@ -107,7 +107,7 @@ def run(config: MazeConfig) -> None:
                 write_output_file(
                     grid=grid,
                     entry=config.entry,
-                    exit_=config.exit,
+                    exit_=config.exit_,
                     path=_coords_to_directions(solution),
                     filepath=config.output_file,
                 )
