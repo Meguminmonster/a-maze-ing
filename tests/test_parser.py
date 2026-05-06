@@ -1,6 +1,6 @@
 import pytest
 from app.errors import ConfigError
-from app.parser import MazeConfig, parse_config
+from app.parser import parse_config
 
 
 def test_config():
@@ -25,6 +25,7 @@ def test_invalid_width(tmp_path):
     )
     with pytest.raises(ConfigError):
         parse_config(str(config_file))
+
 
 def test_missing_key(tmp_path):
     content = """WIDTH=20
