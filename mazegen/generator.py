@@ -98,9 +98,7 @@ class MazeGenerator:
 
     def _reserve_42_pattern(self) -> None:
         """ Defines and reserves 42 pattern.
-
-        Raises:
-            MazeGenerationError: If maze too small for 42 pattern.
+            Unless it doesn-t fit.
         """
         pattern = [
             [1, 0, 1, 0, 1, 1, 1],
@@ -114,7 +112,9 @@ class MazeGenerator:
         pw = len(pattern[0])
 
         if self.width < pw + 2 or self.height < ph + 2:
-            raise MazeGenerationError("Maze too small for 42 pattern.")
+            print("Warning: Maze too small for 42 pattern. Skipping pattern.")
+            self.pattern_42 = set()
+            return
 
         ox = (self.width - pw) // 2
         oy = (self.height - ph) // 2
