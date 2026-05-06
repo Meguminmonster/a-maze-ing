@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    test_parser_extra.py                               :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: jpedra-v <marvin@42.fr>                    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/05/05 16:33:56 by jpedra-v          #+#    #+#              #
-#    Updated: 2026/05/05 16:34:06 by jpedra-v         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 import pytest
 from app.errors import ConfigError
 from app.parser import parse_config

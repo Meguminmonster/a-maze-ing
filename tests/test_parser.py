@@ -1,23 +1,7 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    test_parser.py                                     :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: jpedra-v <marvin@42.fr>                    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/05/05 15:58:37 by jpedra-v          #+#    #+#              #
-#    Updated: 2026/05/05 16:09:27 by jpedra-v         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 import pytest
 from app.errors import ConfigError
 from app.parser import MazeConfig, parse_config
 
-
-# ---------------------------------------------------------
-# TESTS EXISTENTES
-# ---------------------------------------------------------
 
 def test_config():
     config = parse_config("config.txt")
@@ -41,11 +25,6 @@ def test_invalid_width(tmp_path):
     )
     with pytest.raises(ConfigError):
         parse_config(str(config_file))
-
-
-# ---------------------------------------------------------
-# TESTS NUEVOS (FIRMAS PENDIENTES)
-# ---------------------------------------------------------
 
 def test_missing_key(tmp_path):
     content = """WIDTH=20
